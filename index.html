@@ -115,6 +115,12 @@
       .badge-post { background: #fef9e7; color: #b7770d; border: 1px solid #f0d080; }
       .badge-fy   { background: #f4ecfb; color: #7d3c98; }
       .badge-role { background: #eafaf1; color: #1a6b3d; }
+      .training-pill {
+        display: inline-block; background: #eafaf1; color: var(--yes);
+        border: 1px solid #c8ebd7; border-radius: 10px;
+        padding: 2px 7px; margin: 2px 3px 2px 0;
+        font-size: 0.7rem; font-weight: bold; white-space: nowrap;
+      }
 
       .training-name { color: var(--primary); font-weight: bold; }
       .contact-link {
@@ -166,23 +172,23 @@
     <div class="cards">
       <div class="card">
         <div class="num" id="cTotal">–</div>
-        <div class="lbl">Training Records</div>
-      </div>
-      <div class="card">
-        <div class="num" id="cPeople">–</div>
-        <div class="lbl">Unique Participants</div>
+        <div class="lbl">Health Workers</div>
       </div>
       <div class="card">
         <div class="num" id="cMun">–</div>
         <div class="lbl">Municipalities / RMs</div>
       </div>
       <div class="card">
-        <div class="num" id="cTrainings">–</div>
-        <div class="lbl">Unique Trainings</div>
+        <div class="num" id="cFacility">–</div>
+        <div class="lbl">Health Facilities</div>
+      </div>
+      <div class="card">
+        <div class="num" id="cWorkers">–</div>
+        <div class="lbl">Workers with Training</div>
       </div>
       <div class="card" style="border-color: #7d3c98">
-        <div class="num" id="cFY" style="color: #7d3c98">–</div>
-        <div class="lbl">Fiscal Years Covered</div>
+        <div class="num" id="cTypes" style="color: #7d3c98">–</div>
+        <div class="lbl">Total Training Instances</div>
       </div>
     </div>
 
@@ -193,6 +199,10 @@
         <select id="fMun"><option value="">All</option></select>
       </div>
       <div>
+        <label>Health Facility</label>
+        <select id="fFacility"><option value="">All</option></select>
+      </div>
+      <div>
         <label>Training</label>
         <select id="fTraining"><option value="">All</option></select>
       </div>
@@ -201,21 +211,7 @@
         <select id="fPost"><option value="">All</option></select>
       </div>
       <div>
-        <label>Fiscal Year</label>
-        <select id="fFY"><option value="">All</option></select>
-      </div>
-      <div>
-        <label>Role</label>
-        <select id="fRole">
-          <option value="">All</option>
-          <option>Participant</option>
-          <option>Trainer</option>
-          <option>Co-Trainer</option>
-          <option>Coordinator</option>
-        </select>
-      </div>
-      <div>
-        <label>Search Name / Office</label>
+        <label>Search Name / Facility</label>
         <input type="text" id="fSearch" placeholder="Type to search…" style="width: 190px"/>
       </div>
       <button class="btn-reset" onclick="resetFilters()">↺ Reset</button>
@@ -224,14 +220,14 @@
 
     <!-- COVERAGE BARS -->
     <div class="coverage-section">
-      <h3>📊 Top Trainings by Number of Attendees</h3>
+      <h3>📊 Attendance by Training Type</h3>
       <div class="bars-grid" id="coverageBars">Loading…</div>
     </div>
 
     <!-- TABLE -->
     <div class="table-section">
       <div class="table-header">
-        <h3>📋 Approved Training Records</h3>
+        <h3>📋 Health Worker Training Records</h3>
         <small id="rowCount"></small>
       </div>
       <div id="errMsg">⚠ Could not load data. Please check the Apps Script URL in index.html.</div>
@@ -241,15 +237,15 @@
         <thead>
           <tr>
             <th>#</th>
-            <th>Training</th>
-            <th>Role</th>
-            <th>Dates</th>
-            <th>FY</th>
-            <th>Name</th>
-            <th>Designation</th>
-            <th>Office</th>
             <th>Municipality</th>
+            <th>Health Facility</th>
+            <th>Name</th>
+            <th>Post</th>
+            <th>Level</th>
+            <th>Qualification</th>
             <th>Contact</th>
+            <th>Email</th>
+            <th>Trainings Attended</th>
           </tr>
         </thead>
         <tbody id="tbody"></tbody>
@@ -259,35 +255,59 @@
     <script>
       const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyVWRwHAnu1M5X0pyhGAkH08BBAJM1_eyAWBxilgl2o4WgsWLPNgDU4rgh5kp_ErUFtbQ/exec";
 
-      let allData = [];
+      // Flat submissions (one per training-event) and grouped people (one per worker)
+      let rawData = [];
+      let people  = [];
 
       async function loadData() {
         try {
           const res = await fetch(APPS_SCRIPT_URL + "?action=get");
           const json = await res.json();
           const s = v => (v == null ? "" : String(v)).trim();
-          allData = (json.data || []).map(r => ({
+
+          rawData = (json.data || []).map(r => ({
             training_name: s(r.training_name),
-            role:          s(r.role) || "Participant",
-            training_site: s(r.training_site),
-            start_date:    r.start_date || "",
-            end_date:      r.end_date   || "",
-            fiscal_year:   s(r.fiscal_year),
             name:          s(r.name_english) || s(r.name_nepali),
-            sex:           s(r.sex),
             local_level:   s(r.work_local_level) || s(r.perm_local_level),
-            office:        s(r.work_office),
+            hf_name:       s(r.work_office),
             designation:   s(r.designation),
             level:         s(r.level),
             qualification: s(r.qualification),
             contact:       s(r.contact),
-            email:         s(r.email),
-            cadre:         s(r.cadre),
-            sponsor:       s(r.sponsor)
+            email:         s(r.email)
           }));
 
+          // Group flat submissions by person — key = name + contact
+          const map = new Map();
+          rawData.forEach(r => {
+            const key = (r.name + "|" + r.contact).toLowerCase();
+            if (!map.has(key)) {
+              map.set(key, {
+                name:          r.name,
+                local_level:   r.local_level,
+                hf_name:       r.hf_name,
+                designation:   r.designation,
+                level:         r.level,
+                qualification: r.qualification,
+                contact:       r.contact,
+                email:         r.email,
+                trainings:     []
+              });
+            }
+            const p = map.get(key);
+            // Fill in missing fields if a later submission has them
+            ["local_level","hf_name","designation","level","qualification","email"].forEach(f => {
+              if (!p[f] && r[f]) p[f] = r[f];
+            });
+            if (r.training_name && !p.trainings.includes(r.training_name)) {
+              p.trainings.push(r.training_name);
+            }
+          });
+          people = [...map.values()];
+
           document.getElementById("lastUpdate").textContent =
-            "Loaded " + allData.length + " approved records · " + new Date().toLocaleString("en-GB");
+            "Loaded " + people.length + " workers · " + rawData.length + " trainings · " +
+            new Date().toLocaleString("en-GB");
           document.getElementById("loading").style.display = "none";
           buildFilters();
           renderAll();
@@ -311,45 +331,48 @@
       }
 
       function buildFilters() {
-        populate("fMun",      unique(allData.map(r => r.local_level)));
-        populate("fTraining", unique(allData.map(r => r.training_name)));
-        populate("fPost",     unique(allData.map(r => r.designation)));
-        populate("fFY",       unique(allData.map(r => r.fiscal_year)));
+        populate("fMun",      unique(people.map(p => p.local_level)));
+        populate("fTraining", unique(rawData.map(r => r.training_name)));
+        populate("fPost",     unique(people.map(p => p.designation)));
 
-        ["fMun","fTraining","fPost","fFY","fRole","fSearch"].forEach(id =>
+        // Cascading Health Facility on Municipality change
+        document.getElementById("fMun").addEventListener("change", function() {
+          const fac = document.getElementById("fFacility");
+          fac.innerHTML = '<option value="">All</option>';
+          if (this.value) {
+            unique(people.filter(p => p.local_level === this.value).map(p => p.hf_name))
+              .forEach(hf => {
+                const op = document.createElement("option");
+                op.value = hf; op.textContent = hf;
+                fac.appendChild(op);
+              });
+          }
+          renderAll();
+        });
+
+        ["fFacility","fTraining","fPost","fSearch"].forEach(id =>
           document.getElementById(id).addEventListener("input", renderAll)
         );
       }
 
       function getFiltered() {
         const mun      = document.getElementById("fMun").value;
+        const facility = document.getElementById("fFacility").value;
         const training = document.getElementById("fTraining").value;
         const post     = document.getElementById("fPost").value;
-        const fy       = document.getElementById("fFY").value;
-        const role     = document.getElementById("fRole").value;
         const search   = document.getElementById("fSearch").value.toLowerCase();
 
-        return allData.filter(r => {
-          if (mun      && r.local_level   !== mun)      return false;
-          if (training && r.training_name !== training) return false;
-          if (post     && r.designation   !== post)     return false;
-          if (fy       && r.fiscal_year   !== fy)       return false;
-          if (role     && r.role          !== role)     return false;
+        return people.filter(p => {
+          if (mun      && p.local_level !== mun)              return false;
+          if (facility && p.hf_name     !== facility)         return false;
+          if (training && !p.trainings.includes(training))    return false;
+          if (post     && p.designation !== post)             return false;
           if (search) {
-            const blob = (r.name + " " + r.office + " " + r.training_name).toLowerCase();
+            const blob = (p.name + " " + p.hf_name).toLowerCase();
             if (!blob.includes(search)) return false;
           }
           return true;
         });
-      }
-
-      function fmtDate(d) {
-        if (!d) return "–";
-        const s = String(d);
-        // ISO or yyyy-mm-dd
-        const m = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
-        if (m) return m[3] + "/" + m[2] + "/" + m[1];
-        return s.split("T")[0];
       }
 
       function renderAll() {
@@ -360,28 +383,27 @@
       }
 
       function renderCards(rows) {
-        document.getElementById("cTotal").textContent     = rows.length;
-        document.getElementById("cPeople").textContent    = unique(rows.map(r => r.name + "|" + r.contact)).length;
-        document.getElementById("cMun").textContent       = unique(rows.map(r => r.local_level)).length;
-        document.getElementById("cTrainings").textContent = unique(rows.map(r => r.training_name)).length;
-        document.getElementById("cFY").textContent        = unique(rows.map(r => r.fiscal_year)).length;
-        document.getElementById("hdrCount").textContent   = allData.length;
+        document.getElementById("cTotal").textContent    = rows.length;
+        document.getElementById("cMun").textContent      = unique(rows.map(p => p.local_level)).length;
+        document.getElementById("cFacility").textContent = unique(rows.map(p => p.hf_name)).length;
+        document.getElementById("cWorkers").textContent  = rows.filter(p => p.trainings.length > 0).length;
+        document.getElementById("cTypes").textContent    = rows.reduce((s, p) => s + p.trainings.length, 0);
+        document.getElementById("hdrCount").textContent  = people.length;
       }
 
       function renderBars(rows) {
         const counts = {};
-        rows.forEach(r => {
-          if (!r.training_name) return;
-          counts[r.training_name] = (counts[r.training_name] || 0) + 1;
-        });
-        const sorted = Object.entries(counts).sort((a,b) => b[1] - a[1]).slice(0, 12);
+        rows.forEach(p => p.trainings.forEach(t => {
+          counts[t] = (counts[t] || 0) + 1;
+        }));
+        const sorted = Object.entries(counts).sort((a,b) => b[1] - a[1]);
         const max = Math.max(1, ...sorted.map(e => e[1]));
 
         const html = sorted.length === 0
           ? '<div style="color:#888;font-size:.8rem;">No data</div>'
           : sorted.map(([name, cnt]) => `
               <div class="bar-row">
-                <div class="bar-lbl" title="${name}">${name}</div>
+                <div class="bar-lbl" title="${esc(name)}">${esc(name)}</div>
                 <div class="bar-track"><div class="bar-fill" style="width:${(cnt/max)*100}%"></div></div>
                 <div class="bar-cnt">${cnt}</div>
               </div>`).join("");
@@ -403,21 +425,18 @@
         table.style.display = "table";
         document.getElementById("rowCount").textContent = rows.length + " record" + (rows.length === 1 ? "" : "s");
 
-        tbody.innerHTML = rows.map((r, i) => `
+        tbody.innerHTML = rows.map((p, i) => `
           <tr>
             <td>${i + 1}</td>
-            <td><span class="training-name">${esc(r.training_name)}</span></td>
-            <td><span class="badge-role">${esc(r.role)}</span></td>
-            <td>${fmtDate(r.start_date)}<br><small style="color:#888;">to ${fmtDate(r.end_date)}</small></td>
-            <td><span class="badge-fy">${esc(r.fiscal_year || "–")}</span></td>
-            <td><b>${esc(r.name)}</b>${r.qualification ? '<br><small style="color:#888;">'+esc(r.qualification)+'</small>' : ''}</td>
-            <td><span class="badge-post">${esc(r.designation)}</span>${r.level ? '<br><small style="color:#888;">'+esc(r.level)+'</small>' : ''}</td>
-            <td>${esc(r.office)}</td>
-            <td><span class="badge-mun">${esc(r.local_level)}</span></td>
-            <td>
-              ${r.contact ? '<a class="contact-link" href="tel:'+esc(r.contact)+'">📞 '+esc(r.contact)+'</a>' : ''}
-              ${r.email   ? '<a class="contact-link" href="mailto:'+esc(r.email)+'">✉ '+esc(r.email)+'</a>' : ''}
-            </td>
+            <td><span class="badge-mun">${esc(p.local_level)}</span></td>
+            <td>${esc(p.hf_name)}</td>
+            <td><b>${esc(p.name)}</b></td>
+            <td><span class="badge-post">${esc(p.designation)}</span></td>
+            <td>${esc(p.level)}</td>
+            <td>${esc(p.qualification)}</td>
+            <td>${p.contact ? '<a class="contact-link" href="tel:'+esc(p.contact)+'">📞 '+esc(p.contact)+'</a>' : ''}</td>
+            <td>${p.email   ? '<a class="contact-link" href="mailto:'+esc(p.email)+'">✉ '+esc(p.email)+'</a>' : ''}</td>
+            <td>${p.trainings.map(t => '<span class="training-pill">'+esc(t)+'</span>').join("")}</td>
           </tr>`).join("");
       }
 
@@ -428,9 +447,10 @@
       }
 
       function resetFilters() {
-        ["fMun","fTraining","fPost","fFY","fRole","fSearch"].forEach(id => {
+        ["fMun","fFacility","fTraining","fPost","fSearch"].forEach(id => {
           document.getElementById(id).value = "";
         });
+        document.getElementById("fFacility").innerHTML = '<option value="">All</option>';
         renderAll();
       }
 
