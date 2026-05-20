@@ -147,6 +147,87 @@ function getOrCreateSheet() {
   return sheet;
 }
 
+// ── One-shot import of historical CSV data ─────────────────
+//
+// USAGE:
+//   1. In your Google Sheet, create a new tab named exactly "RawImport"
+//   2. Open "training information.csv" in Excel/Notepad, copy ALL rows
+//      (including the header row), paste into RawImport starting at A1
+//   3. In this Apps Script editor: pick function "importHistoricalCsv"
+//      from the dropdown, click Run, authorize if asked
+//   4. After it finishes, you can DELETE the RawImport tab
+//
+// All imported rows are written to "Submissions" with status = Approved
+// so they appear on the public portfolio immediately. No email is sent.
+//
+function importHistoricalCsv() {
+  const ss  = SpreadsheetApp.getActiveSpreadsheet();
+  const src = ss.getSheetByName("RawImport");
+  if (!src) throw new Error('Create a sheet named "RawImport" and paste the CSV contents there first.');
+
+  const data = src.getDataRange().getValues();
+  if (data.length < 2) throw new Error("RawImport tab is empty.");
+
+  // Build header index
+  const srcHeaders = data[0];
+  const idx = {};
+  srcHeaders.forEach((h, i) => { idx[String(h).trim()] = i; });
+
+  const TRAININGS = [
+    "PEN","CNSI","HMIS","DHIS2","STP","ENT","Implant","IUCD","CoFP",
+    "MA","SBA","RUSG","Immunization","TB modular","PMTCT","PAMSv2","CBIMNCI","Mental Health"
+  ];
+
+  const dest = getOrCreateSheet();
+  const now  = "Historical Import";
+  const newRows = [];
+
+  for (let i = 1; i < data.length; i++) {
+    const row  = data[i];
+    const name = String(row[idx["Name of HW"]] || "").trim();
+    if (!name) continue;
+
+    const baseRow = {
+      submitted_at:      now,
+      status:            "Approved",
+      role:              "Participant",
+      training_province: "Koshi",
+      training_district: "Sankhuwasabha",
+      name_english:      name,
+      perm_province:     "Koshi",
+      perm_district:     "Sankhuwasabha",
+      perm_local_level:  String(row[idx["Local Level"]] || ""),
+      contact:           String(row[idx["Contact No"]]  || ""),
+      email:             String(row[idx["Email ID"]]    || ""),
+      qualification:     String(row[idx["Qualification"]] || ""),
+      work_office:       String(row[idx["HF Name"]]     || ""),
+      work_district:     "Sankhuwasabha",
+      work_province:     "Koshi",
+      work_local_level:  String(row[idx["Local Level"]] || ""),
+      designation:       String(row[idx["Post"]]        || ""),
+      level:             String(row[idx["Level"]]       || "")
+    };
+
+    TRAININGS.forEach(t => {
+      const val = String(row[idx[t]] || "").toLowerCase().trim();
+      if (val !== "yes") return;
+      const merged = Object.assign({}, baseRow, { training_name: t });
+      const arr = COLUMNS.map(c => merged[c] !== undefined ? merged[c] : "");
+      newRows.push(arr);
+    });
+  }
+
+  if (newRows.length === 0) {
+    SpreadsheetApp.getUi().alert("No 'Yes'-marked trainings found in RawImport. Nothing imported.");
+    return;
+  }
+
+  const startRow = dest.getLastRow() + 1;
+  dest.getRange(startRow, 1, newRows.length, COLUMNS.length).setValues(newRows);
+
+  SpreadsheetApp.getUi().alert("Imported " + newRows.length + " approved training rows from RawImport.");
+}
+
 function styleHeader(sheet) {
   const hr = sheet.getRange(1, 1, 1, COLUMNS.length);
   hr.setBackground("#1a3c6e");
