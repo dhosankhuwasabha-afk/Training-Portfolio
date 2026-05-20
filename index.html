@@ -265,24 +265,25 @@
         try {
           const res = await fetch(APPS_SCRIPT_URL + "?action=get");
           const json = await res.json();
+          const s = v => (v == null ? "" : String(v)).trim();
           allData = (json.data || []).map(r => ({
-            training_name: (r.training_name || "").trim(),
-            role: (r.role || "Participant").trim(),
-            training_site: (r.training_site || "").trim(),
-            start_date: r.start_date || "",
-            end_date: r.end_date || "",
-            fiscal_year: (r.fiscal_year || "").trim(),
-            name: (r.name_english || r.name_nepali || "").trim(),
-            sex: (r.sex || "").trim(),
-            local_level: (r.work_local_level || r.perm_local_level || "").trim(),
-            office: (r.work_office || "").trim(),
-            designation: (r.designation || "").trim(),
-            level: (r.level || "").trim(),
-            qualification: (r.qualification || "").trim(),
-            contact: (r.contact || "").trim(),
-            email: (r.email || "").trim(),
-            cadre: (r.cadre || "").trim(),
-            sponsor: (r.sponsor || "").trim()
+            training_name: s(r.training_name),
+            role:          s(r.role) || "Participant",
+            training_site: s(r.training_site),
+            start_date:    r.start_date || "",
+            end_date:      r.end_date   || "",
+            fiscal_year:   s(r.fiscal_year),
+            name:          s(r.name_english) || s(r.name_nepali),
+            sex:           s(r.sex),
+            local_level:   s(r.work_local_level) || s(r.perm_local_level),
+            office:        s(r.work_office),
+            designation:   s(r.designation),
+            level:         s(r.level),
+            qualification: s(r.qualification),
+            contact:       s(r.contact),
+            email:         s(r.email),
+            cadre:         s(r.cadre),
+            sponsor:       s(r.sponsor)
           }));
 
           document.getElementById("lastUpdate").textContent =
