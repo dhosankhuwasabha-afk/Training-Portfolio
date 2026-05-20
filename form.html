@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Training Registration Form – Health Training Center, Dhankuta</title>
+  <style>
+    :root { --primary:#1a3c6e; --accent:#c0392b; --yes:#27ae60; --border:#d0dce8; --light:#eaf1fb; }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:Arial,sans-serif; background:#f0f4f8; color:#222; }
+
+    header {
+      background:var(--primary); color:#fff;
+      padding:18px 24px; text-align:center;
+      display:flex; align-items:center; justify-content:center; gap:16px;
+    }
+    header img { height:64px; width:auto; }
+    header h1 { font-size:1.05rem; font-weight:bold; }
+    header p  { font-size:.78rem; opacity:.9; margin-top:3px; }
+    header .title { font-size:1.15rem; font-weight:bold; margin-top:4px; text-decoration:underline; }
+
+    .container { max-width:780px; margin:24px auto 40px; padding:0 16px; }
+
+    .card {
+      background:#fff; border-radius:10px;
+      box-shadow:0 2px 8px rgba(0,0,0,.09);
+      padding:22px 26px; margin-bottom:18px;
+    }
+    .card h2 {
+      font-size:.95rem; color:var(--primary);
+      border-bottom:2px solid var(--primary);
+      padding-bottom:8px; margin-bottom:18px;
+      text-transform:uppercase; letter-spacing:.5px;
+    }
+
+    .field { margin-bottom:14px; }
+    label  { font-size:.82rem; color:#444; display:block; margin-bottom:5px; font-weight:bold; }
+    .hint  { font-size:.72rem; color:#888; margin-top:3px; }
+    input, select, textarea {
+      width:100%; padding:9px 12px;
+      border:1px solid var(--border); border-radius:6px;
+      font-size:.88rem; background:#fff; transition:border .2s;
+      font-family:inherit;
+    }
+    input:focus, select:focus, textarea:focus {
+      outline:none; border-color:var(--primary);
+      box-shadow:0 0 0 3px rgba(26,60,110,.1);
+    }
+    .required { color:var(--accent); }
+
+    .row2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    .row3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; }
+
+    /* Radio/Checkbox groups */
+    .opt-group { display:flex; flex-wrap:wrap; gap:10px; }
+    .opt {
+      display:flex; align-items:center; gap:7px;
+      background:#f8f9fb; border:1.5px solid var(--border);
+      border-radius:6px; padding:7px 12px; cursor:pointer;
+      font-size:.83rem; transition:all .15s;
+    }
+    .opt input { width:auto; cursor:pointer; accent-color:var(--primary); }
+    .opt:hover { border-color:var(--primary); }
+    .opt.checked { background:#eafaf1; border-color:var(--yes); color:#1a6b3d; font-weight:bold; }
+
+    .inline-text { display:flex; align-items:center; gap:8px; }
+    .inline-text .opt { white-space:nowrap; }
+    .inline-text input[type=text] { flex:1; }
+
+    /* Submit */
+    .btn-submit {
+      width:100%; padding:14px; background:var(--yes); color:#fff;
+      border:none; border-radius:8px; font-size:1rem;
+      font-weight:bold; cursor:pointer; letter-spacing:.5px;
+      transition:background .2s;
+    }
+    .btn-submit:hover:not(:disabled) { background:#219150; }
+    .btn-submit:disabled { background:#95a5a6; cursor:not-allowed; }
+
+    .note-box {
+      background:#fff8e1; border-left:4px solid #f39c12;
+      padding:12px 16px; font-size:.78rem; color:#555;
+      border-radius:4px; line-height:1.6;
+    }
+    .note-box strong { color:#e67e22; }
+
+    /* Success */
+    #successScreen { display:none; text-align:center; padding:40px 20px; }
+    .success-icon { font-size:4rem; }
+    #successScreen h2 { color:var(--yes); margin:16px 0 8px; font-size:1.3rem; }
+    #successScreen p  { color:#555; font-size:.9rem; line-height:1.6; }
+    .btn-another {
+      display:inline-block; margin-top:20px;
+      background:var(--primary); color:#fff;
+      padding:10px 24px; border-radius:6px;
+      font-size:.9rem; cursor:pointer; border:none;
+    }
+
+    @media(max-width:600px) {
+      .row2, .row3 { grid-template-columns:1fr; }
+      header { flex-direction:column; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <img src="logo.png" alt="Nepal Government Logo"/>
+  <div>
+    <p>Province Government</p>
+    <p>Koshi Province · Ministry of Health</p>
+    <h1>Health Training Center, Dhankuta</h1>
+    <div class="title">Training Registration Form</div>
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- Success Screen -->
+  <div id="successScreen">
+    <div class="success-icon">✅</div>
+    <h2>Form Submitted Successfully!</h2>
+    <p>Thank you for submitting your training registration.<br>
+    Your entry will be reviewed by the Health Training Center, Dhankuta.</p>
+    <button class="btn-another" onclick="resetForm()">Submit Another Record</button>
+    <br><br>
+    <a href="index.html" style="color:var(--primary);font-size:.85rem;">← View Public Portfolio</a>
+  </div>
+
+  <form id="mainForm">
+
+    <!-- Training Information -->
+    <div class="card">
+      <h2>📋 Training Information</h2>
+
+      <div class="field">
+        <label>Training Name <span class="required">*</span></label>
+        <input type="text" name="training_name" placeholder="Enter the name of the training" required/>
+      </div>
+
+      <div class="field">
+        <label>Role in Training <span class="required">*</span></label>
+        <div class="opt-group">
+          <label class="opt"><input type="radio" name="role" value="Participant" required/> Participant</label>
+          <label class="opt"><input type="radio" name="role" value="Trainer"/> Trainer</label>
+          <label class="opt"><input type="radio" name="role" value="Co-Trainer"/> Co-Trainer</label>
+          <label class="opt"><input type="radio" name="role" value="Coordinator"/> Coordinator</label>
+        </div>
+      </div>
+
+      <div class="row3">
+        <div class="field">
+          <label>Training Site <span class="required">*</span></label>
+          <input type="text" name="training_site" placeholder="Venue / location" required/>
+        </div>
+        <div class="field">
+          <label>Province</label>
+          <input type="text" name="training_province" value="Koshi" readonly style="background:#eef2f7;"/>
+        </div>
+        <div class="field">
+          <label>District</label>
+          <input type="text" name="training_district" value="Sankhuwasabha" readonly style="background:#eef2f7;"/>
+        </div>
+      </div>
+
+      <div class="row3">
+        <div class="field">
+          <label>Starting Date <span class="required">*</span></label>
+          <input type="date" name="start_date" required/>
+        </div>
+        <div class="field">
+          <label>Ending Date <span class="required">*</span></label>
+          <input type="date" name="end_date" required/>
+        </div>
+        <div class="field">
+          <label>Fiscal Year <span class="required">*</span></label>
+          <input type="text" name="fiscal_year" placeholder="e.g. 2082/83" required/>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Personal Information -->
+    <div class="card">
+      <h2>👤 Personal Information</h2>
+
+      <div class="field">
+        <label>Name (in Block Letters) <span class="required">*</span></label>
+        <input type="text" name="name_english" placeholder="FULL NAME IN CAPITAL LETTERS" required style="text-transform:uppercase;"/>
+      </div>
+
+      <div class="field">
+        <label>नेपालीमा नाम (Name in Nepali)</label>
+        <input type="text" name="name_nepali" placeholder="आफ्नो नाम नेपालीमा लेख्नुहोस्"/>
+      </div>
+
+      <div class="row2">
+        <div class="field">
+          <label>Sex <span class="required">*</span></label>
+          <div class="opt-group">
+            <label class="opt"><input type="radio" name="sex" value="Male" required/> Male</label>
+            <label class="opt"><input type="radio" name="sex" value="Female"/> Female</label>
+            <label class="opt"><input type="radio" name="sex" value="Other"/> Other</label>
+          </div>
+        </div>
+        <div class="field">
+          <label>Date of Birth (BS) <span class="required">*</span></label>
+          <input type="text" name="dob_bs" placeholder="YYYY/MM/DD (BS)" required pattern="\d{4}/\d{1,2}/\d{1,2}"/>
+          <div class="hint">Format: 2050/05/15</div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Sex – Other (Specify)</label>
+        <input type="text" name="sex_other" placeholder="Specify if 'Other' selected above"/>
+      </div>
+    </div>
+
+    <!-- Permanent Address -->
+    <div class="card">
+      <h2>🏠 Permanent Address</h2>
+
+      <div class="row2">
+        <div class="field">
+          <label>Province</label>
+          <input type="text" name="perm_province" value="Koshi" readonly style="background:#eef2f7;"/>
+        </div>
+        <div class="field">
+          <label>District</label>
+          <input type="text" name="perm_district" value="Sankhuwasabha" readonly style="background:#eef2f7;"/>
+        </div>
+      </div>
+
+      <div class="row2">
+        <div class="field">
+          <label>Rural / Municipality <span class="required">*</span></label>
+          <select name="perm_local_level" required>
+            <option value="">-- Select Local Level --</option>
+            <option>Khadbari Municipality</option>
+            <option>Chainpur Municipality</option>
+            <option>Dharmadevi Municipality</option>
+            <option>Panchkhapan Municipality</option>
+            <option>Madi Municipality</option>
+            <option>Bhotkhola Rural Municipality</option>
+            <option>Chichila Rural Municipality</option>
+            <option>Makalu Rural Municipality</option>
+            <option>Sabhapokhari Rural Municipality</option>
+            <option>Silichong Rural Municipality</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Ward No. <span class="required">*</span></label>
+          <input type="number" name="perm_ward" min="1" max="35" placeholder="e.g. 5" required/>
+        </div>
+      </div>
+
+      <div class="row2">
+        <div class="field">
+          <label>Contact No. <span class="required">*</span></label>
+          <input type="tel" name="contact" placeholder="98XXXXXXXX" required/>
+        </div>
+        <div class="field">
+          <label>Email</label>
+          <input type="email" name="email" placeholder="yourname@gmail.com"/>
+        </div>
+      </div>
+    </div>
+
+    <!-- Caste -->
+    <div class="card">
+      <h2>👥 Caste</h2>
+      <div class="opt-group">
+        <label class="opt"><input type="radio" name="caste" value="Dalit"/> Dalit</label>
+        <label class="opt"><input type="radio" name="caste" value="Janjati"/> Janjati</label>
+        <label class="opt"><input type="radio" name="caste" value="Madhesi"/> Madhesi</label>
+        <label class="opt"><input type="radio" name="caste" value="Adibasi"/> Adibasi</label>
+        <label class="opt"><input type="radio" name="caste" value="Muslim"/> Muslim</label>
+        <label class="opt"><input type="radio" name="caste" value="Brahmin/Kshetri"/> Brahmin/Kshetri</label>
+        <label class="opt"><input type="radio" name="caste" value="Other"/> Other</label>
+      </div>
+      <div class="field" style="margin-top:12px;">
+        <label>If Other, Specify</label>
+        <input type="text" name="caste_other" placeholder="Specify caste"/>
+      </div>
+    </div>
+
+    <!-- Cadre -->
+    <div class="card">
+      <h2>🩺 Cadre</h2>
+      <div class="opt-group">
+        <label class="opt"><input type="radio" name="cadre" value="Medical" required/> Medical</label>
+        <label class="opt"><input type="radio" name="cadre" value="Nursing"/> Nursing</label>
+        <label class="opt"><input type="radio" name="cadre" value="Paramedics"/> Paramedics</label>
+        <label class="opt"><input type="radio" name="cadre" value="Other"/> Other</label>
+      </div>
+      <div class="field" style="margin-top:12px;">
+        <label>If Other, Specify</label>
+        <input type="text" name="cadre_other" placeholder="Specify cadre"/>
+      </div>
+      <div class="field">
+        <label>Qualification <span class="required">*</span></label>
+        <input type="text" name="qualification" placeholder="e.g. PCL in General Medicine, B.Sc. Nursing, MBBS" required/>
+      </div>
+    </div>
+
+    <!-- Sponsored -->
+    <div class="card">
+      <h2>💼 Sponsored By</h2>
+      <div class="field">
+        <label>Sponsor Type <span class="required">*</span></label>
+        <div class="opt-group">
+          <label class="opt"><input type="radio" name="sponsor" value="Government" required/> Government</label>
+          <label class="opt"><input type="radio" name="sponsor" value="Non-Government"/> Non-Government</label>
+          <label class="opt"><input type="radio" name="sponsor" value="Self"/> Self</label>
+          <label class="opt"><input type="radio" name="sponsor" value="Private Organization"/> Private Organization</label>
+          <label class="opt"><input type="radio" name="sponsor" value="Other"/> Other</label>
+        </div>
+      </div>
+      <div class="field">
+        <label>Sponsor Details (Name / Specify)</label>
+        <input type="text" name="sponsor_details" placeholder="Name of organization or specify other"/>
+      </div>
+    </div>
+
+    <!-- Working Place -->
+    <div class="card">
+      <h2>🏢 Working Place</h2>
+
+      <div class="row2">
+        <div class="field">
+          <label>Working Organization (Office) <span class="required">*</span></label>
+          <input type="text" name="work_office" placeholder="Name of office / health facility" required/>
+        </div>
+        <div class="field">
+          <label>District</label>
+          <input type="text" name="work_district" value="Sankhuwasabha" readonly style="background:#eef2f7;"/>
+        </div>
+      </div>
+
+      <div class="row2">
+        <div class="field">
+          <label>Province</label>
+          <input type="text" name="work_province" value="Koshi" readonly style="background:#eef2f7;"/>
+        </div>
+        <div class="field">
+          <label>Rural / Municipality <span class="required">*</span></label>
+          <select name="work_local_level" required>
+            <option value="">-- Select Local Level --</option>
+            <option>Khadbari Municipality</option>
+            <option>Chainpur Municipality</option>
+            <option>Dharmadevi Municipality</option>
+            <option>Panchkhapan Municipality</option>
+            <option>Madi Municipality</option>
+            <option>Bhotkhola Rural Municipality</option>
+            <option>Chichila Rural Municipality</option>
+            <option>Makalu Rural Municipality</option>
+            <option>Sabhapokhari Rural Municipality</option>
+            <option>Silichong Rural Municipality</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row3">
+        <div class="field">
+          <label>Office Contact No.</label>
+          <input type="tel" name="work_contact" placeholder="Office phone"/>
+        </div>
+        <div class="field">
+          <label>Designation <span class="required">*</span></label>
+          <select name="designation" required>
+            <option value="">-- Select --</option>
+            <option>HA – Health Assistant</option>
+            <option>Sr. AHW – Senior Auxiliary Health Worker</option>
+            <option>AHW – Auxiliary Health Worker</option>
+            <option>Sr. ANM – Senior Auxiliary Nurse Midwife</option>
+            <option>ANM – Auxiliary Nurse Midwife</option>
+            <option>Staff Nurse</option>
+            <option>PHI – Public Health Inspector</option>
+            <option>LA – Lab Assistant</option>
+            <option>CMA – Community Medical Assistant</option>
+            <option>OA – Office Assistant</option>
+            <option>Baidh</option>
+            <option>Medical Officer</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Level</label>
+          <select name="level">
+            <option value="">-- Select --</option>
+            <option>4th Level</option>
+            <option>5th Level</option>
+            <option>6th Level</option>
+            <option>7th Level</option>
+            <option>8th Level</option>
+            <option>9th Level</option>
+            <option>10th Level</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row3">
+        <div class="field">
+          <label>PIS No.</label>
+          <input type="text" name="pis_no" placeholder="Personnel Information System No."/>
+        </div>
+        <div class="field">
+          <label>Citizenship No. & Issued District</label>
+          <input type="text" name="citizenship" placeholder="e.g. 1234/567 – Sankhuwasabha"/>
+        </div>
+        <div class="field">
+          <label>Council Reg. No.</label>
+          <input type="text" name="council_reg" placeholder="Professional Council Reg. No."/>
+        </div>
+      </div>
+    </div>
+
+    <!-- Submit -->
+    <div class="card" style="background:var(--light);border:1px solid var(--border)">
+      <p style="font-size:.82rem;color:#555;margin-bottom:14px;line-height:1.6;">
+        By submitting this form, you confirm that the information provided is accurate.
+        Your record will be reviewed by Health Office, Sankhuwasabha before being archived.
+      </p>
+      <button type="submit" class="btn-submit" id="submitBtn">
+        Submit Registration Form
+      </button>
+    </div>
+
+  </form>
+</div>
+
+<script>
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyVWRwHAnu1M5X0pyhGAkH08BBAJM1_eyAWBxilgl2o4WgsWLPNgDU4rgh5kp_ErUFtbQ/exec";
+
+// Visual highlight for selected radio/checkbox options
+document.querySelectorAll('.opt input').forEach(inp => {
+  inp.addEventListener('change', () => {
+    const name = inp.name;
+    if (inp.type === 'radio') {
+      document.querySelectorAll('.opt input[name="' + name + '"]').forEach(r => {
+        r.closest('.opt').classList.toggle('checked', r.checked);
+      });
+    } else {
+      inp.closest('.opt').classList.toggle('checked', inp.checked);
+    }
+  });
+});
+
+// Form submit
+document.getElementById("mainForm").addEventListener("submit", async function(e) {
+  e.preventDefault();
+  const btn = document.getElementById("submitBtn");
+  btn.textContent = "Submitting… Please wait";
+  btn.disabled = true;
+
+  const fd   = new FormData(this);
+  const data = { status: "Pending" };
+  fd.forEach((v, k) => data[k] = v);
+
+  data.submitted_at = new Date().toLocaleString("en-GB");
+
+  try {
+    await fetch(APPS_SCRIPT_URL + "?action=add", {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data)
+    });
+    document.getElementById("mainForm").style.display = "none";
+    document.getElementById("successScreen").style.display = "block";
+    window.scrollTo(0,0);
+  } catch(err) {
+    alert("Submission failed. Please check your internet connection and try again.\n\n" + err.message);
+    btn.textContent = "Submit Registration Form";
+    btn.disabled = false;
+  }
+});
+
+function resetForm() {
+  const form = document.getElementById("mainForm");
+  form.reset();
+  form.style.display = "block";
+  document.getElementById("successScreen").style.display = "none";
+  document.querySelectorAll(".opt").forEach(o => o.classList.remove("checked"));
+  document.getElementById("submitBtn").textContent = "Submit Registration Form";
+  document.getElementById("submitBtn").disabled = false;
+  window.scrollTo(0,0);
+}
+</script>
+</body>
+</html>
